@@ -1,0 +1,20 @@
+{
+  "name": "violet",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "repository": "https://github.com/bergren2/violet.git",
+  "author": "bergren2 <dan@heymrbass.com>",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.4.1",
+    "koa-passport": "^4.0.1",
+    "koa-route": "^3.2.0",
+    "nconf": "^0.10.0",
+    "passport-oauth2": "^1.4.0",
+    "yahoo-fantasy": "^2.0.4"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
