@@ -1,23 +1,26 @@
 var nconf = require("nconf");
 var passport = require("koa-passport");
+var path = require("path");
+var render = require("koa-ejs");
 var request = require("request");
-var route = require("koa-route");
 
 var Koa = require("koa");
 var OAuth2Strategy = require("passport-oauth2");
+var Router = require("koa-router");
 var YahooFantasy = require("yahoo-fantasy");
 
 var app = new Koa();
+var router = new Router();
 
 nconf.argv()
   .env()
   .file({ file: "config.json" })
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.deserializeUser(function(obj, done) {
+passport.deserializeUser(function (obj, done) {
   done(null, obj);
 });
 
@@ -28,7 +31,7 @@ passport.use(
     clientID: nconf.get("yapi:clientId"),
     clientSecret: nconf.get("yapi:clientSecret"),
     callbackURL: nconf.get("appHost") + "/auth/yahoo/callback"
-  }, function(accessToken, refreshToken, params, profile, done) {
+  }, function (accessToken, refreshToken, params, profile, done) {
     var options = {
       url: "https://social.yahooapis.com/v1/user/" + params.xoauth_yahoo_guid + "/profile?format=json",
       method: "get",
@@ -67,19 +70,30 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // routes
+ render(app, {
+  root: path.join(__dirname, "views"),
+  layout: "template",
+  viewExt: "ejs",
+  cache: false,
+  debug: false,
+});
 
-app.use(route.get("/auth/yahoo", passport.authenticate("oauth2")));
-
-app.use(route.get("/auth/yahoo/callback",
-  passport.authenticate("oauth2", {
-    failureRedirect: "/login",
-    successRedirect: "/"
+router
+  .get("/auth/yahoo", function (ctx, next) {
+    passport.authenticate("oauth2");
   })
-));
+  .get("/auth/yahoo/callback", function (ctx, next) {
+    passport.authenticate("oauth2", {
+      failureRedirect: "/login",
+      successRedirect: "/"
+    });
+  })
+  .get("/", async function (ctx, next) {
+    await ctx.render("index");
+  });
 
-app.use(route.get("/logout", function(req, res) {
-  req.logout();
-}));
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 // if a user has logged in (not required for all endpoints)
 // yf.setUserToken(
@@ -90,7 +104,7 @@ app.use(route.get("/logout", function(req, res) {
 // query a resource/subresource
 // app.yf.league.teams(
 //   nconf.get("leagueKeys:2014"),
-//   function(err, data) {
+//   function (err, data) {
 //     if (err)
 //       console.log(err);
 
@@ -98,6 +112,6 @@ app.use(route.get("/logout", function(req, res) {
 //   }
 // );
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("listening on port 3000");
 });
