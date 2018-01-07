@@ -6,7 +6,9 @@
 
 [Create a Yahoo App](https://developer.yahoo.com/apps/create/) with read
 permissions for Fantasy Sports. For local development, I use the basic package
-from [ngrok](https://ngrok.com/). Next,
+from [ngrok](https://ngrok.com/), but you can also [mess around with host
+files](https://yahoodevelopers.tumblr.com/post/105969451213/implementing-yahoo-oauth2-authentication).
+Next,
 
     $ cp config.json.example config.json
 
