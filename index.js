@@ -3,6 +3,7 @@ var passport = require("koa-passport");
 var path = require("path");
 var render = require("koa-ejs");
 var request = require("request");
+var session = require("koa-session");
 
 var Koa = require("koa");
 var OAuth2Strategy = require("passport-oauth2");
@@ -11,6 +12,10 @@ var YahooFantasy = require("yahoo-fantasy");
 
 var app = new Koa();
 var router = new Router();
+
+// sessions
+app.keys = ['secret']
+app.use(session({}, app))
 
 nconf.argv()
   .env()
@@ -79,17 +84,26 @@ app.use(passport.session());
 });
 
 router
+  .get("/logout", async function (ctx, next) {
+    if (ctx.isAuthenticated()) {
+      ctx.logout();
+      ctx.redirect("/");
+    } else {
+      ctx.body = { success: false };
+      ctx.throw(401);
+    }
+  })
   .get("/auth/yahoo", function (ctx, next) {
-    passport.authenticate("oauth2");
+    passport.authenticate("oauth2")(ctx);
   })
   .get("/auth/yahoo/callback", function (ctx, next) {
-    passport.authenticate("oauth2", {
-      failureRedirect: "/login",
-      successRedirect: "/"
-    });
+    return passport.authenticate("oauth2", {
+      successRedirect: '/',
+      failureRedirect: '/'
+    })(ctx);
   })
   .get("/", async function (ctx, next) {
-    await ctx.render("index");
+    await ctx.render("index", { authenticated: ctx.isAuthenticated() });
   });
 
 app.use(router.routes());
