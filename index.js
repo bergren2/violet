@@ -13,13 +13,13 @@ var YahooFantasy = require("yahoo-fantasy");
 var app = new Koa();
 var router = new Router();
 
-// sessions
-app.keys = ['secret']
-app.use(session({}, app))
-
 nconf.argv()
   .env()
   .file({ file: "config.json" })
+
+// sessions
+app.keys = [nconf.get("appKey")]
+app.use(session({}, app))
 
 passport.serializeUser(function (user, done) {
   done(null, user);
