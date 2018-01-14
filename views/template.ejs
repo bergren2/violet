@@ -4,7 +4,16 @@
     <title>FFLegacy</title>
   </head>
   <body>
-    <h3>FFLegacy</h3>
+    <h1>FFLegacy</h1>
+
+    <nav>
+    <% if (authenticated) { %>
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/auth/yahoo">Authenticate</a>
+    <% } %>
+    </nav>
+
     <%- body %>
   </body>
 </html>
